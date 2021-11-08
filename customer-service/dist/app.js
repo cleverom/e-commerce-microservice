@@ -5,10 +5,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var http_errors_1 = __importDefault(require("http-errors"));
 var express_1 = __importDefault(require("express"));
+var dotenv_1 = __importDefault(require("dotenv"));
+var mongoose_1 = __importDefault(require("mongoose"));
+var cors_1 = __importDefault(require("cors"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
 var index_1 = __importDefault(require("./routes/index"));
+dotenv_1.default.config();
+mongoose_1.default
+    .connect(process.env.DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+})
+    .then(function () { return console.log('Connected to MongoDB'); })
+    .catch(function (err) { return console.log(err.message); });
 var app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use((0, morgan_1.default)('dev'));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
