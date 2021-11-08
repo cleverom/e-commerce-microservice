@@ -39,9 +39,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProduct = void 0;
+exports.buyProduct = exports.createProduct = exports.connect = void 0;
+var amqplib_1 = __importDefault(require("amqplib"));
 var product_1 = __importDefault(require("../utils/product"));
 var product_2 = __importDefault(require("../model/product"));
+var connection;
+var channel;
+function connect() {
+    return __awaiter(this, void 0, void 0, function () {
+        var amqpServer;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    amqpServer = "amqp://localhost:5672";
+                    return [4 /*yield*/, amqplib_1.default.connect(amqpServer)];
+                case 1:
+                    connection = _a.sent();
+                    return [4 /*yield*/, connection.createChannel()];
+                case 2:
+                    channel = _a.sent();
+                    return [4 /*yield*/, channel.assertQueue("PRODUCT")];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.connect = connect;
 function createProduct(req, res) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, name, description, price, _b, error, value, newProduct;
@@ -61,3 +86,42 @@ function createProduct(req, res) {
     });
 }
 exports.createProduct = createProduct;
+function buyProduct(req, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var order, finalOrder, ids, products, error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    ids = req.body.ids;
+                    console.log(ids);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, product_2.default.find({ _id: { $in: ids } })];
+                case 2:
+                    products = _a.sent();
+                    console.log(req.user, products);
+                    channel.sendToQueue("ORDER", Buffer.from(JSON.stringify({
+                        products: products,
+                        userEmail: req.user.email,
+                    })));
+                    channel.consume("PRODUCT", function (data) {
+                        // let datas = Buffer.from(JSON.stringify(data.content))
+                        order = JSON.parse(data.content);
+                        console.log(order);
+                        channel.ack(data);
+                        finalOrder = JSON.stringify(order, null, 2);
+                        // console.log(JSON.parse(datas.toString()))
+                        // console.log(datas)
+                    });
+                    return [2 /*return*/, res.send(finalOrder).status(201)];
+                case 3:
+                    error_1 = _a.sent();
+                    console.error(error_1);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.buyProduct = buyProduct;
