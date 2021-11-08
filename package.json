@@ -1,0 +1,11 @@
+{
+  "name": "e-commerce-microservice",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/cleverom/e-commerce-microservice.git",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jsonwebtoken": "^8.5.5",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
