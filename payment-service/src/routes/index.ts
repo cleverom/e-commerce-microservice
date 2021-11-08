@@ -1,9 +1,8 @@
 import express from 'express';
+import { makePayment } from '../controllers/payment';
 const router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.send('hello from payment');
-});
+router.post('/payment', makePayment)
 
 export default router;

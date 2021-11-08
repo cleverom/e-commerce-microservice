@@ -7,7 +7,21 @@ var http_errors_1 = __importDefault(require("http-errors"));
 var express_1 = __importDefault(require("express"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
+var dotenv_1 = __importDefault(require("dotenv"));
+var mongoose_1 = __importDefault(require("mongoose"));
+var payment_1 = require("./controllers/payment");
 var index_1 = __importDefault(require("./routes/index"));
+dotenv_1.default.config();
+mongoose_1.default
+    .connect(process.env.DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+})
+    .then(function () { return console.log('Connected to MongoDB'); })
+    .catch(function (err) { return console.log(err.message); });
+(0, payment_1.connect)();
 var app = (0, express_1.default)();
 app.use((0, morgan_1.default)('dev'));
 app.use(express_1.default.json());
