@@ -45,17 +45,23 @@ async function connect() {
 connect().then(() => {
   channel.consume("ORDER", (data: any) => {
       console.log("Consuming ORDER service");
-      const { products, userEmail } = JSON.parse(data.content);
-      const newOrder = createOrder(products, userEmail);
+      const { products, user} = JSON.parse(data.content);
+      console.log(products, user)
+      const newOrder = createOrder(products, user);
       channel.ack(data);
-      channel.sendToQueue(
-          "PRODUCT",
-          Buffer.from(JSON.stringify({ newOrder }))
-      );
-      channel.sendToQueue(
-          "PAYMENT",
-          Buffer.from(JSON.stringify({ newOrder }))
-      );
+      if(products){
+
+        channel.sendToQueue(
+            "PRODUCT",
+            Buffer.from(JSON.stringify({ newOrder }))
+        );
+        channel.sendToQueue(
+            "PAYMENT",
+            Buffer.from(JSON.stringify({ newOrder }))
+        );
+      }else{
+        console.log('No product available')
+      }
   });
 });
 

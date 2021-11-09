@@ -89,11 +89,17 @@ function connect() {
 connect().then(function () {
     channel.consume("ORDER", function (data) {
         console.log("Consuming ORDER service");
-        var _a = JSON.parse(data.content), products = _a.products, userEmail = _a.userEmail;
-        var newOrder = (0, order_1.createOrder)(products, userEmail);
+        var _a = JSON.parse(data.content), products = _a.products, user = _a.user;
+        console.log(products, user);
+        var newOrder = (0, order_1.createOrder)(products, user);
         channel.ack(data);
-        channel.sendToQueue("PRODUCT", Buffer.from(JSON.stringify({ newOrder: newOrder })));
-        channel.sendToQueue("PAYMENT", Buffer.from(JSON.stringify({ newOrder: newOrder })));
+        if (products) {
+            channel.sendToQueue("PRODUCT", Buffer.from(JSON.stringify({ newOrder: newOrder })));
+            channel.sendToQueue("PAYMENT", Buffer.from(JSON.stringify({ newOrder: newOrder })));
+        }
+        else {
+            console.log('No product available');
+        }
     });
 });
 // catch 404 and forward to error handler

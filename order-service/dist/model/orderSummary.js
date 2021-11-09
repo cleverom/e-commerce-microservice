@@ -5,17 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = __importDefault(require("mongoose"));
 var Schema = mongoose_1.default.Schema;
-var OrderSchema = new Schema({
-    products: [
-        {
-            product_id: String,
-        },
-    ],
+var OrderSummarySchema = new Schema({
+    productId: String,
     customerId: String,
-    total_price: Number,
+    orderId: String,
+    price: Number,
+    orderStatus: {
+        type: String,
+        enum: ['Pending', 'Completed', 'Canceled', 'Failed']
+    },
     created_at: {
         type: Date,
         default: Date.now(),
     },
 });
-exports.default = mongoose_1.default.model("order", OrderSchema);
+exports.default = mongoose_1.default.model("orderSummary", OrderSummarySchema);

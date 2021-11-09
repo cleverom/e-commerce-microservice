@@ -7,15 +7,16 @@ exports.createOrder = void 0;
 var order_1 = __importDefault(require("../model/order"));
 var connection;
 var channel;
-function createOrder(products, userEmail) {
+function createOrder(products, user) {
     var total = 0;
+    if (!products) {
+        console.log('no product available');
+    }
     try {
-        for (var t = 0; t < products.length; ++t) {
-            total += products[t].price;
-        }
+        total = products.price;
         var newOrder = new order_1.default({
             products: products,
-            user: userEmail,
+            customerId: user.id,
             total_price: total,
         });
         newOrder.save();

@@ -6,16 +6,17 @@ let connection: any;
 let channel: any;
 
 
-export function createOrder(products: Record<string, any>[], userEmail: Record<string, unknown>[]) {
+export function createOrder(products: Record<string, any>, user: Record<string, unknown>) {
     let total = 0;
+    if(!products){
+        console.log('no product available')
+    }
     try{
 
-        for (let t = 0; t < products.length; ++t) {
-            total += products[t].price;
-        }
+        total = products.price
         const newOrder = new orderSchema({
             products,
-            user: userEmail,
+            customerId: user.id,
             total_price: total,
         });
         newOrder.save();
