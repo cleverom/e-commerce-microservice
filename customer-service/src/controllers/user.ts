@@ -37,7 +37,8 @@ export async function login(req: Request, res: Response) {
         }
         const payload = {
             email,
-            name: user.name
+            name: user.name,
+            id: user._id
         };
         jwt.sign(payload, "secret", (err: any, token: any) => {
             if (err) console.log(err);

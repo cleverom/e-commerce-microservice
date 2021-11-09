@@ -94,7 +94,8 @@ function login(req, res) {
                         }
                         payload = {
                             email: email,
-                            name: user.name
+                            name: user.name,
+                            id: user._id
                         };
                         jsonwebtoken_1.default.sign(payload, "secret", function (err, token) {
                             if (err)
