@@ -30,36 +30,36 @@ export async function createProduct(req: Request, res: Response) {
 
 }
 
-export async function buyProduct(req: Request, res: Response | any) {
+export async function buyProduct(req: Request | any, res: Response ) {
     let order;
-    let finalOrder;
+    
     const { ids } = req.body;
-    console.log(ids)
+    // console.log(ids)
     try {
-
-        const products = await productSchema.find({ _id: { $in: ids } });
-        console.log(req.user, products)
+        const products = await productSchema.findOne({ _id: { $in: ids } });
+        console.log(products)
+        console.log(req.user)
         channel.sendToQueue(
             "ORDER",
             Buffer.from(
                 JSON.stringify({
                     products,
-                    userEmail: req.user.email,
+                    user: req.user,
                 })
             )
         );
         channel.consume("PRODUCT", (data: any) => {
-            // let datas = Buffer.from(JSON.stringify(data.content))
+            
             order = JSON.parse(data.content);
-            console.log(order)
             channel.ack(data)
-            finalOrder = JSON.stringify(order, null, 2)
-            // console.log(JSON.parse(datas.toString()))
-            // console.log(datas)
-
-
+            
+            
+            console.log(order)
+            
+            
+            return res.send(order).status(201);
         });
-         return res.send(finalOrder).status(201);
+        
 
     } catch (error) {
         console.error(error)

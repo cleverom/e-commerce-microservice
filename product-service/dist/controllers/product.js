@@ -88,33 +88,30 @@ function createProduct(req, res) {
 exports.createProduct = createProduct;
 function buyProduct(req, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var order, finalOrder, ids, products, error_1;
+        var order, ids, products, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     ids = req.body.ids;
-                    console.log(ids);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, product_2.default.find({ _id: { $in: ids } })];
+                    return [4 /*yield*/, product_2.default.findOne({ _id: { $in: ids } })];
                 case 2:
                     products = _a.sent();
-                    console.log(req.user, products);
+                    console.log(products);
+                    console.log(req.user);
                     channel.sendToQueue("ORDER", Buffer.from(JSON.stringify({
                         products: products,
-                        userEmail: req.user.email,
+                        user: req.user,
                     })));
                     channel.consume("PRODUCT", function (data) {
-                        // let datas = Buffer.from(JSON.stringify(data.content))
                         order = JSON.parse(data.content);
-                        console.log(order);
                         channel.ack(data);
-                        finalOrder = JSON.stringify(order, null, 2);
-                        // console.log(JSON.parse(datas.toString()))
-                        // console.log(datas)
+                        console.log(order);
+                        return res.send(order).status(201);
                     });
-                    return [2 /*return*/, res.send(finalOrder).status(201)];
+                    return [3 /*break*/, 4];
                 case 3:
                     error_1 = _a.sent();
                     console.error(error_1);
