@@ -39,8 +39,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makePayment = exports.connect = void 0;
+exports.makePayment = exports.paymentOrder = exports.connect = void 0;
 var amqplib_1 = __importDefault(require("amqplib"));
+var payment_1 = __importDefault(require("../models/payment"));
 var connection;
 var channel;
 function connect() {
@@ -65,21 +66,41 @@ function connect() {
     });
 }
 exports.connect = connect;
+function paymentOrder(paymentDetails) {
+    if (!paymentDetails) {
+        console.log('no product available');
+    }
+    try {
+        var newPaymentOrder = new payment_1.default({
+            customerId: paymentDetails.newOrder.customerId,
+            orderId: paymentDetails.newOrder._id,
+            total_price: paymentDetails.newOrder.total_price,
+        });
+        newPaymentOrder.save();
+        return newPaymentOrder;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+exports.paymentOrder = paymentOrder;
 function makePayment(req, res) {
     return __awaiter(this, void 0, void 0, function () {
         var paymentDetails;
         return __generator(this, function (_a) {
             try {
                 channel.consume("PAYMENT", function (data) {
-                    // let datas = Buffer.from(JSON.stringify(data.content))
-                    // console.log(data)
                     paymentDetails = JSON.parse(data.content);
-                    console.log(paymentDetails);
                     channel.ack(data);
-                    // console.log(JSON.parse(datas.toString()))
-                    // console.log(datas)
+                    paymentOrder(paymentDetails);
+                    if (paymentDetails) {
+                        channel.sendToQueue("TRANSACTIONS", Buffer.from(JSON.stringify({ paymentDetails: paymentDetails })));
+                        return res.send(paymentDetails).status(201);
+                    }
+                    else {
+                        console.log('No payment details');
+                    }
                 });
-                return [2 /*return*/, res.send(paymentDetails).status(201)];
             }
             catch (error) {
                 console.error(error);

@@ -12,28 +12,52 @@ export async function connect() {
     await channel.assertQueue("PAYMENT");
 }
 
+export function paymentOrder(paymentDetails: Record<string, any>) {
+    if (!paymentDetails) {
+        console.log('no product available')
+    }
+    try {
+
+        const newPaymentOrder = new paymentSchema({
+            customerId: paymentDetails.newOrder.customerId,
+            orderId: paymentDetails.newOrder._id,
+            total_price: paymentDetails.newOrder.total_price,
+        });
+        newPaymentOrder.save();
+        return newPaymentOrder;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
 export async function makePayment(req: Request, res: Response | any) {
     let paymentDetails;
     try {
+
         channel.consume("PAYMENT", (data: any) => {
-            // let datas = Buffer.from(JSON.stringify(data.content))
-            // console.log(data)
             paymentDetails = JSON.parse(data.content);
-            console.log(paymentDetails)
             channel.ack(data)
-            
-            // console.log(JSON.parse(datas.toString()))
-            // console.log(datas)
+            paymentOrder(paymentDetails)
+            if (paymentDetails) {
+
+                channel.sendToQueue(
+                    "TRANSACTIONS",
+                    Buffer.from(JSON.stringify({ paymentDetails }))
+                );
+                return res.send(paymentDetails).status(201);
+            }else{
+                console.log('No payment details')
+              }
 
 
         });
-        
-         return res.send(paymentDetails).status(201);
 
     } catch (error) {
         console.error(error)
     }
-
-
 }
+
+
 

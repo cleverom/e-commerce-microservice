@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const PaymentSchema = new Schema({
     customerId: String,
     orderId: String,
-    amount: Number,
+    total_price: Number,
     created_at: {
         type: Date,
         default: Date.now(),
