@@ -9,6 +9,7 @@ var PaymentSchema = new Schema({
     customerId: String,
     orderId: String,
     total_price: Number,
+    orderStatus: String,
     created_at: {
         type: Date,
         default: Date.now(),

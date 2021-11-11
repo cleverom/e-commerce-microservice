@@ -3,7 +3,7 @@ import express, {Request, Response, NextFunction} from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import mongodbConnection from './config/config';
 import {connect} from './controllers/payment';
 import indexRouter from './routes/index';
 
@@ -11,19 +11,11 @@ import indexRouter from './routes/index';
 
 dotenv.config();
 
-mongoose
-  .connect(process.env.DATABASE_URL!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.log(err.message));
+
 
 
 connect()
-
+mongodbConnection()
 
 let app = express();
 

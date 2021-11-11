@@ -22,9 +22,10 @@ export function paymentOrder(paymentDetails: Record<string, any>) {
             customerId: paymentDetails.newOrder.customerId,
             orderId: paymentDetails.newOrder._id,
             total_price: paymentDetails.newOrder.total_price,
+            orderStatus: "success",
         });
         newPaymentOrder.save();
-        return newPaymentOrder;
+        return {data: newPaymentOrder, message: 'payment successful'};
     } catch (error) {
         console.error(error);
     }
@@ -46,7 +47,7 @@ export async function makePayment(req: Request, res: Response | any) {
                     "TRANSACTIONS",
                     Buffer.from(JSON.stringify({ paymentDetails }))
                 );
-                return res.send(paymentDetails).status(201);
+                return res.json({data: paymentDetails, message: "success"}).status(201);
             }else{
                 console.log('No payment details')
               }

@@ -39,75 +39,58 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.makePayment = exports.paymentOrder = exports.connect = void 0;
-var amqplib_1 = __importDefault(require("amqplib"));
-var payment_1 = __importDefault(require("../models/payment"));
-var connection;
-var channel;
-function connect() {
-    return __awaiter(this, void 0, void 0, function () {
-        var amqpServer;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    amqpServer = "amqp://localhost:5672";
-                    return [4 /*yield*/, amqplib_1.default.connect(amqpServer)];
-                case 1:
-                    connection = _a.sent();
-                    return [4 /*yield*/, connection.createChannel()];
-                case 2:
-                    channel = _a.sent();
-                    return [4 /*yield*/, channel.assertQueue("PAYMENT")];
-                case 3:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
+var supertest_1 = __importDefault(require("supertest"));
+var app_1 = __importDefault(require("../app"));
+var request = (0, supertest_1.default)(app_1.default);
+describe('checking WRONG GET requests', function () {
+    describe('GET/', function () {
+        it('should return RESPONSE 404 FOR all data', function () { return __awaiter(void 0, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, request.get('/api/dat')];
+                    case 1:
+                        res = _a.sent();
+                        expect(res.status).toBe(404);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        it('should return RESPONSE 404 FOR single data', function () { return __awaiter(void 0, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, request.get('/api/d')];
+                    case 1:
+                        res = _a.sent();
+                        expect(res.status).toBe(404);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
     });
-}
-exports.connect = connect;
-function paymentOrder(paymentDetails) {
-    if (!paymentDetails) {
-        console.log('no product available');
-    }
-    try {
-        var newPaymentOrder = new payment_1.default({
-            customerId: paymentDetails.newOrder.customerId,
-            orderId: paymentDetails.newOrder._id,
-            total_price: paymentDetails.newOrder.total_price,
-            orderStatus: "success",
-        });
-        newPaymentOrder.save();
-        return newPaymentOrder;
-    }
-    catch (error) {
-        console.error(error);
-    }
-}
-exports.paymentOrder = paymentOrder;
-function makePayment(req, res) {
-    return __awaiter(this, void 0, void 0, function () {
-        var paymentDetails;
-        return __generator(this, function (_a) {
-            try {
-                channel.consume("PAYMENT", function (data) {
-                    paymentDetails = JSON.parse(data.content);
-                    channel.ack(data);
-                    paymentOrder(paymentDetails);
-                    if (paymentDetails) {
-                        channel.sendToQueue("TRANSACTIONS", Buffer.from(JSON.stringify({ paymentDetails: paymentDetails })));
-                        return res.send(paymentDetails).status(201);
-                    }
-                    else {
-                        console.log('No payment details');
-                    }
-                });
-            }
-            catch (error) {
-                console.error(error);
-            }
-            return [2 /*return*/];
-        });
-    });
-}
-exports.makePayment = makePayment;
+});
+// describe('Post to Endpoints', () => {
+//     it('should create a post', async (done) => {
+//         const res = await request
+//             .post('/product')
+//             .send({
+//                 "name": "clever",
+//                 "dexcription": "price",
+//                 "price": 200
+//             })
+//         expect(res.status).toEqual(201)
+//         done()
+//     })
+//     it('should not create a post, return response 404', async (done) => {
+//         const res = await request
+//             .post('/api/123')
+//             .send({
+//                 "name": "clever",
+//                 "dexcription": "price",
+//                 "price": 200
+//             })
+//         expect(res.status).toEqual(404)
+//         done()
+//     })
+// })
