@@ -1,26 +1,17 @@
 import createError, { HttpError } from 'http-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 
 import indexRouter from './routes/index';
+import mongodbConnection from './config/config';
 
 
 dotenv.config();
 
-mongoose
-  .connect(process.env.DATABASE_URL!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.log(err.message));
-
+mongodbConnection()
 let app = express();
 app.use(cors());
 app.use(logger('dev'));
