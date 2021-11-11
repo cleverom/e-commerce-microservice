@@ -2,10 +2,10 @@ import createError, { HttpError } from 'http-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import {connect} from './controllers/product';
+import mongodbConnection from './config/config'
 import {isUser} from './isUser'
 
 
@@ -13,18 +13,10 @@ import indexRouter from './routes/index';
 
 dotenv.config();
 
-mongoose
-  .connect(process.env.DATABASE_URL!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.log(err.message));
-
 
 connect()
+
+mongodbConnection()
 
 let app = express();
 
@@ -34,7 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/', isUser, indexRouter);
+app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

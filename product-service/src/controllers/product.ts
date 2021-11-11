@@ -3,7 +3,6 @@ import { Request, Response } from 'express'
 import commentObject from '../utils/product'
 import productSchema from '../model/product'
 
-
 let connection: any;
 let channel: any;
 
@@ -13,7 +12,6 @@ export async function connect() {
     channel = await connection.createChannel();
     await channel.assertQueue("PRODUCT");
 }
-
 
 export async function createProduct(req: Request, res: Response) {
     const { name, description, price } = req.body;
@@ -26,19 +24,18 @@ export async function createProduct(req: Request, res: Response) {
         .catch((error) => {
             throw error;
         });;
-    return res.json(newProduct).sendStatus(201);
+    return res.json("product creaed successfully").status(201);
 
 }
 
-export async function buyProduct(req: Request | any, res: Response ) {
+export async function buyProduct(req: Request | any, res: Response) {
     let order;
-    
+
     const { ids } = req.body;
     // console.log(ids)
     try {
         const products = await productSchema.findOne({ _id: { $in: ids } });
-        console.log(products)
-        console.log(req.user)
+
         channel.sendToQueue(
             "ORDER",
             Buffer.from(
@@ -49,17 +46,13 @@ export async function buyProduct(req: Request | any, res: Response ) {
             )
         );
         channel.consume("PRODUCT", (data: any) => {
-            
+
             order = JSON.parse(data.content);
             channel.ack(data)
-            
-            
-            console.log(order)
-            
-            
+
             return res.send(order).status(201);
         });
-        
+
 
     } catch (error) {
         console.error(error)

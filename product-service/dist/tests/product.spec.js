@@ -39,83 +39,74 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buyProduct = exports.createProduct = exports.connect = void 0;
-var amqplib_1 = __importDefault(require("amqplib"));
-var product_1 = __importDefault(require("../utils/product"));
-var product_2 = __importDefault(require("../model/product"));
-var connection;
-var channel;
-function connect() {
-    return __awaiter(this, void 0, void 0, function () {
-        var amqpServer;
+var supertest_1 = __importDefault(require("supertest"));
+var app_1 = __importDefault(require("../app"));
+var request = (0, supertest_1.default)(app_1.default);
+describe('checking WRONG GET requests', function () {
+    describe('GET/', function () {
+        it('should return RESPONSE 404 FOR all data', function () { return __awaiter(void 0, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, request.get('/api/dat')];
+                    case 1:
+                        res = _a.sent();
+                        expect(res.status).toBe(404);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        it('should return RESPONSE 404 FOR single data', function () { return __awaiter(void 0, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, request.get('/api/d')];
+                    case 1:
+                        res = _a.sent();
+                        expect(res.status).toBe(404);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+    });
+});
+describe('Post to Endpoints', function () {
+    it('should create a post', function (done) { return __awaiter(void 0, void 0, void 0, function () {
+        var res;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    amqpServer = "amqp://localhost:5672";
-                    return [4 /*yield*/, amqplib_1.default.connect(amqpServer)];
+                case 0: return [4 /*yield*/, request
+                        .post('/product')
+                        .send({
+                        "name": "clever",
+                        "dexcription": "price",
+                        "price": 200
+                    })];
                 case 1:
-                    connection = _a.sent();
-                    return [4 /*yield*/, connection.createChannel()];
-                case 2:
-                    channel = _a.sent();
-                    return [4 /*yield*/, channel.assertQueue("PRODUCT")];
-                case 3:
-                    _a.sent();
+                    res = _a.sent();
+                    expect(res.status).toEqual(201);
+                    done();
                     return [2 /*return*/];
             }
         });
-    });
-}
-exports.connect = connect;
-function createProduct(req, res) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, name, description, price, _b, error, value, newProduct;
-        return __generator(this, function (_c) {
-            _a = req.body, name = _a.name, description = _a.description, price = _a.price;
-            _b = product_1.default.validate({ name: name, description: description, price: price }), error = _b.error, value = _b.value;
-            if (error === null || error === void 0 ? void 0 : error.details)
-                throw error;
-            newProduct = new product_2.default(value);
-            newProduct.save().then()
-                .catch(function (error) {
-                throw error;
-            });
-            ;
-            return [2 /*return*/, res.json("product creaed successfully").status(201)];
-        });
-    });
-}
-exports.createProduct = createProduct;
-function buyProduct(req, res) {
-    return __awaiter(this, void 0, void 0, function () {
-        var order, ids, products, error_1;
+    }); });
+    it('should not create a post, return response 404', function (done) { return __awaiter(void 0, void 0, void 0, function () {
+        var res;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    ids = req.body.ids;
-                    _a.label = 1;
+                case 0: return [4 /*yield*/, request
+                        .post('/api/123')
+                        .send({
+                        "name": "clever",
+                        "dexcription": "price",
+                        "price": 200
+                    })];
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, product_2.default.findOne({ _id: { $in: ids } })];
-                case 2:
-                    products = _a.sent();
-                    channel.sendToQueue("ORDER", Buffer.from(JSON.stringify({
-                        products: products,
-                        user: req.user,
-                    })));
-                    channel.consume("PRODUCT", function (data) {
-                        order = JSON.parse(data.content);
-                        channel.ack(data);
-                        return res.send(order).status(201);
-                    });
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_1 = _a.sent();
-                    console.error(error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    res = _a.sent();
+                    expect(res.status).toEqual(404);
+                    done();
+                    return [2 /*return*/];
             }
         });
-    });
-}
-exports.buyProduct = buyProduct;
+    }); });
+});

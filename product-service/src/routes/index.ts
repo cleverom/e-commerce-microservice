@@ -10,3 +10,4 @@ router.post('/product', createProduct)
 router.post('/product/buy', buyProduct)
 
 export default router;
+
