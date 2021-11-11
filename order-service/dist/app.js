@@ -47,8 +47,8 @@ var mongoose_1 = __importDefault(require("mongoose"));
 var dotenv_1 = __importDefault(require("dotenv"));
 var order_1 = require("./controllers/order");
 var amqplib_1 = __importDefault(require("amqplib"));
-var channel, connection;
-// import indexRouter from './routes/index';
+var channel;
+var connection;
 dotenv_1.default.config();
 mongoose_1.default
     .connect(process.env.DATABASE_URL, {
@@ -64,7 +64,6 @@ app.use((0, morgan_1.default)('dev'));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
-// app.use('/', indexRouter);
 function connect() {
     return __awaiter(this, void 0, void 0, function () {
         var amqpServer;
@@ -88,9 +87,7 @@ function connect() {
 }
 connect().then(function () {
     channel.consume("ORDER", function (data) {
-        console.log("Consuming ORDER service");
         var _a = JSON.parse(data.content), products = _a.products, user = _a.user;
-        console.log(products, user);
         var newOrder = (0, order_1.createOrder)(products, user);
         channel.ack(data);
         if (products) {

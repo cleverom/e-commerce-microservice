@@ -1,9 +1,5 @@
-import amqp from "amqplib";
 import { Request, Response } from 'express'
 import orderSchema from '../model/order'
-
-let connection: any;
-let channel: any;
 
 
 export function createOrder(products: Record<string, any>, user: Record<string, unknown>) {

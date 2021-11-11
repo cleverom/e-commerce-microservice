@@ -5,8 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createOrder = void 0;
 var order_1 = __importDefault(require("../model/order"));
-var connection;
-var channel;
 function createOrder(products, user) {
     var total = 0;
     if (!products) {

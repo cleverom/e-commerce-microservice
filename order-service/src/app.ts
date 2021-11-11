@@ -2,28 +2,17 @@ import createError, { HttpError } from 'http-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { createOrder } from './controllers/order'
 import amqp from "amqplib";
+import mongodbConnection from './config/config';
 
-let channel: amqp.Channel, connection;
+let channel: amqp.Channel
+let connection
 
-// import indexRouter from './routes/index';
 dotenv.config();
 
-mongoose
-  .connect(process.env.DATABASE_URL!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.log(err.message));
-
-
-
+mongodbConnection()
 
 var app = express();
 
@@ -33,7 +22,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// app.use('/', indexRouter);
 
 async function connect() {
   const amqpServer = "amqp://localhost:5672";
@@ -44,9 +32,7 @@ async function connect() {
 
 connect().then(() => {
   channel.consume("ORDER", (data: any) => {
-      console.log("Consuming ORDER service");
       const { products, user} = JSON.parse(data.content);
-      console.log(products, user)
       const newOrder = createOrder(products, user);
       channel.ack(data);
       if(products){
