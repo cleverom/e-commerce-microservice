@@ -7,11 +7,7 @@ import mongodbConnection from './config/config';
 import {connect} from './controllers/payment';
 import indexRouter from './routes/index';
 
-
-
 dotenv.config();
-
-
 
 
 connect()
