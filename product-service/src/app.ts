@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import {connect} from './controllers/product';
 import mongodbConnection from './config/config'
-import {isUser} from './isUser'
 
 
 import indexRouter from './routes/index';

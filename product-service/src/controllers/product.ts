@@ -3,9 +3,10 @@ import { Request, Response } from 'express'
 import commentObject from '../utils/product'
 import productSchema from '../model/product'
 
-let connection: any;
-let channel: any;
 
+
+let connection;
+let channel: string | any
 export async function connect() {
     const amqpServer = "amqp://localhost:5672";
     connection = await amqp.connect(amqpServer);
@@ -28,11 +29,11 @@ export async function createProduct(req: Request, res: Response) {
 
 }
 
-export async function buyProduct(req: Request | any, res: Response) {
+export async function buyProduct(req: any, res: Response) {
     let order;
 
     const { ids } = req.body;
-    // console.log(ids)
+    
     try {
         const products = await productSchema.findOne({ _id: { $in: ids } });
 
@@ -45,7 +46,7 @@ export async function buyProduct(req: Request | any, res: Response) {
                 })
             )
         );
-        channel.consume("PRODUCT", (data: any) => {
+        channel.consume("PRODUCT", (data: Record<string, never>) => {
 
             order = JSON.parse(data.content);
             channel.ack(data)
